@@ -1,3 +1,6 @@
+/- Just a scratch pad to play around and try things-/
+
+
 
 /-A hypothesis implies negation of its negation-/
 theorem double_negate_pf_by_contr (p: Prop) : p -> ¬ (¬ p) := λ (h : p) (f : ¬ p) => f h
