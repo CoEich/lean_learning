@@ -1,6 +1,6 @@
 /- De Morgan rule -/
 
-def de_morgan {p q: Prop} : ¬ (p ∨ q) ↔ ¬ p ∧ ¬ q :=
+theorem de_morgan {p q: Prop} : ¬ (p ∨ q) ↔ ¬ p ∧ ¬ q :=
   -- we need to provide two proofs as arguments to 'Iff.intro'
   Iff.intro
     (
@@ -35,7 +35,7 @@ def de_morgan {p q: Prop} : ¬ (p ∨ q) ↔ ¬ p ∧ ¬ q :=
 variable (p q r : Prop)
 
 -- commutativity of ∧ and ∨
-def lem_1 {s t : Prop} : s ∧ t → t ∧ s :=
+theorem lem_1 {s t : Prop} : s ∧ t → t ∧ s :=
   λ (h: s ∧ t) =>
         have hs : s := h.left
         have ht : t := h.right
@@ -43,7 +43,7 @@ def lem_1 {s t : Prop} : s ∧ t → t ∧ s :=
 
 example : p ∧ q ↔ q ∧ p := Iff.intro lem_1 lem_1
 
-def lem_2 {s t : Prop} : s ∨ t → t ∨ s :=
+theorem lem_2 {s t : Prop} : s ∨ t → t ∨ s :=
   λ (h : s ∨ t) =>
     -- We use 'suffices' here to reach the goal conditioned on a hypothesis that we have to show below
     suffices impls : (s → t ∨ s) ∧ (t → t ∨ s) from Or.elim h impls.left impls.right
