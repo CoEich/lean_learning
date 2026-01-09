@@ -1,6 +1,6 @@
 /- De Morgan rule -/
 
-theorem de_morgan {p q: Prop} : ¬ (p ∨ q) ↔ ¬ p ∧ ¬ q :=
+ theorem de_morgan {p q: Prop} : ¬ (p ∨ q) ↔ ¬ p ∧ ¬ q :=
   -- we need to provide two proofs as arguments to 'Iff.intro'
   Iff.intro
     (
@@ -35,13 +35,13 @@ theorem de_morgan {p q: Prop} : ¬ (p ∨ q) ↔ ¬ p ∧ ¬ q :=
 variable (p q r : Prop)
 
 -- commutativity of ∧ and ∨
+
+-- because the statements are symmetric it's shorter to just apply these lemmas in both directions
 theorem lem_1 {s t : Prop} : s ∧ t → t ∧ s :=
   λ (h: s ∧ t) =>
-        have hs : s := h.left
-        have ht : t := h.right
-        show t ∧ s from ⟨ht, hs⟩
-
-example : p ∧ q ↔ q ∧ p := Iff.intro lem_1 lem_1
+    have hs : s := h.left
+    have ht : t := h.right
+    show t ∧ s from ⟨ht, hs⟩
 
 theorem lem_2 {s t : Prop} : s ∨ t → t ∨ s :=
   λ (h : s ∨ t) =>
@@ -52,10 +52,30 @@ theorem lem_2 {s t : Prop} : s ∨ t → t ∨ s :=
       have right_impl: t → t ∨ s := λ (ht: t) => Or.inl ht
       ⟨left_impl, right_impl⟩
 
+example : p ∧ q ↔ q ∧ p := Iff.intro lem_1 lem_1
+
 example : p ∨ q ↔ q ∨ p := Iff.intro lem_2 lem_2
 
 -- associativity of ∧ and ∨
-example : (p ∧ q) ∧ r ↔ p ∧ (q ∧ r) := sorry
+example : (p ∧ q) ∧ r ↔ p ∧ (q ∧ r) :=
+  Iff.intro
+    (
+      λ (h: (p ∧ q) ∧ r) =>
+        have hp: p := h.left.left
+        have hq: q := h.left.right
+        have hr: r := h.right
+        show p ∧ (q ∧ r) from ⟨hp, hq, hr⟩
+    )
+
+    (
+      λ (h: p ∧ (q ∧ r)) =>
+        have hp: p := h.left
+        have hq: q := h.right.left
+        have hr: r := h.right.right
+        -- note: ⟨hp, hq, hr⟩ does not work here
+        show (p ∧ q) ∧ r from ⟨⟨ hp, hq⟩ , hr⟩
+    )
+
 example : (p ∨ q) ∨ r ↔ p ∨ (q ∨ r) := sorry
 
 -- distributivity
@@ -71,6 +91,20 @@ example : ¬(p ∧ ¬p) := sorry
 example : p ∧ ¬q → ¬(p → q) := sorry
 example : ¬p → (p → q) := sorry
 example : (¬p ∨ q) → (p → q) := sorry
-example : p ∨ False ↔ p := sorry
-example : p ∧ False ↔ False := sorry
-example : (p → q) → (¬q → ¬p) := sorry
+
+example : p ∨ False ↔ p :=
+  Iff.intro
+    (
+      λ (h: p ∨ False) =>
+      have c1: p → p := id
+      have c2: False → p := False.elim
+      show p from Or.elim h c1 c2
+    )
+
+    λ (h: p) => show p ∨ False from Or.inl h
+
+example : p ∧ False ↔ False :=
+  Iff.intro (λ (h: p ∧ False) => False.elim h.right) False.elim
+
+example : (p → q) → (¬q → ¬p) :=
+  λ (ipq: p → q) (hnq: ¬ q) (hp: p) => hnq (ipq hp)
