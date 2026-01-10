@@ -1,3 +1,5 @@
+set_option linter.unusedVariables false
+
 /- De Morgan rule -/
 
  theorem de_morgan {p q: Prop} : ¬ (p ∨ q) ↔ ¬ p ∧ ¬ q :=
@@ -32,18 +34,18 @@
 
 /- Other exercises -/
 
-variable (p q r : Prop)
-
 -- commutativity of ∧ and ∨
 
 -- because the statements are symmetric it's shorter to just apply these lemmas in both directions
-theorem lem_1 {s t : Prop} : s ∧ t → t ∧ s :=
+theorem lem_ex_1 {s t : Prop} : s ∧ t → t ∧ s :=
   λ (h: s ∧ t) =>
     have hs : s := h.left
     have ht : t := h.right
     show t ∧ s from ⟨ht, hs⟩
 
-theorem lem_2 {s t : Prop} : s ∨ t → t ∨ s :=
+theorem example_1 {p q: Prop} : p ∧ q ↔ q ∧ p := Iff.intro lem_ex_1 lem_ex_1
+
+theorem lem_ex_2 {s t : Prop} : s ∨ t → t ∨ s :=
   λ (h : s ∨ t) =>
     -- We use 'suffices' here to reach the goal conditioned on a hypothesis that we have to show below
     suffices impls : (s → t ∨ s) ∧ (t → t ∨ s) from Or.elim h impls.left impls.right
@@ -52,58 +54,87 @@ theorem lem_2 {s t : Prop} : s ∨ t → t ∨ s :=
       have right_impl: t → t ∨ s := λ (ht: t) => Or.inl ht
       ⟨left_impl, right_impl⟩
 
-example : p ∧ q ↔ q ∧ p := Iff.intro lem_1 lem_1
-
-example : p ∨ q ↔ q ∨ p := Iff.intro lem_2 lem_2
+theorem example_2 {p q: Prop} : p ∨ q ↔ q ∨ p := Iff.intro lem_ex_2 lem_ex_2
 
 -- associativity of ∧ and ∨
-example : (p ∧ q) ∧ r ↔ p ∧ (q ∧ r) :=
-  Iff.intro
-    (
-      λ (h: (p ∧ q) ∧ r) =>
+
+-- again we formulate one direction of the equivalence as its own lemma
+theorem lem_ex_3 {p q r: Prop} : (p ∧ q) ∧ r → p ∧ (q ∧ r) :=
+  λ (h: (p ∧ q) ∧ r) =>
         have hp: p := h.left.left
         have hq: q := h.left.right
         have hr: r := h.right
         show p ∧ (q ∧ r) from ⟨hp, hq, hr⟩
-    )
 
-    (
-      λ (h: p ∧ (q ∧ r)) =>
-        have hp: p := h.left
-        have hq: q := h.right.left
-        have hr: r := h.right.right
-        -- note: ⟨hp, hq, hr⟩ does not work here
-        show (p ∧ q) ∧ r from ⟨⟨ hp, hq⟩ , hr⟩
-    )
+theorem example_3 {p q r: Prop} : (p ∧ q) ∧ r ↔ p ∧ (q ∧ r) :=
+  Iff.intro
+    lem_ex_3
 
-example : (p ∨ q) ∨ r ↔ p ∨ (q ∨ r) := sorry
+    λ h: p ∧ (q ∧ r) =>
+
+      /- Solution 1: copy paste lem_ex_3 more or less
+      have hp: p := h.left
+      have hq: q := h.right.left
+      have hr: r := h.right.right
+      -- note: ⟨hp, hq, hr⟩ does not work here
+      show (p ∧ q) ∧ r from ⟨⟨ hp, hq⟩ , hr⟩ -/
+
+      -- Solution 2: Be more cool and use lemmas and theorems we already have :-)
+      have hswap1 : (q ∧ r) ∧ p := Iff.mp example_1 h
+      have assoc1: q ∧ (r ∧ p) := lem_ex_3 hswap1
+      have hswap2: (r ∧ p) ∧ q := Iff.mp example_1 assoc1
+      have assoc2: r ∧ (p ∧ q) := lem_ex_3 hswap2
+      show (p ∧ q) ∧ r from Iff.mp example_1 assoc2
+
+
+-- same strategy as before
+theorem lem_ex_4 {p q r: Prop} : (p ∨ q) ∨ r → p ∨ (q ∨ r) :=
+  λ h: (p ∨ q) ∨ r =>
+        have impl1 : (p ∨ q) → p ∨ (q ∨ r) := λ hpq: p ∨ q =>
+          have implp: p → p ∨ (q ∨ r) := λ hp : p => Or.inl hp
+          have implq: q → p ∨ (q ∨ r) := λ hq: q => Or.inr (Or.inl hq)
+          show p ∨ (q ∨ r) from Or.elim hpq implp implq
+        have impl2: r → p ∨ (q ∨ r) := λ hr: r => Or.inr (Or.inr hr)
+        show p ∨ (q ∨ r) from Or.elim h impl1 impl2
+
+theorem example_4 {p q r: Prop} : (p ∨ q) ∨ r ↔ p ∨ (q ∨ r) :=
+  Iff.intro
+    lem_ex_4
+
+    λ h: p ∨ (q ∨ r) =>
+
+    have hswap1 : (q ∨ r) ∨ p := Iff.mp example_2 h
+      have assoc1: q ∨ (r ∨ p) := lem_ex_4 hswap1
+      have hswap2: (r ∨ p) ∨ q := Iff.mp example_2 assoc1
+      have assoc2: r ∨ (p ∨ q) := lem_ex_4 hswap2
+      show (p ∨ q) ∨ r from Iff.mp example_2 assoc2
 
 -- distributivity
-example : p ∧ (q ∨ r) ↔ (p ∧ q) ∨ (p ∧ r) := sorry
-example : p ∨ (q ∧ r) ↔ (p ∨ q) ∧ (p ∨ r) := sorry
+theorem example_5 {p q r: Prop} : p ∧ (q ∨ r) ↔ (p ∧ q) ∨ (p ∧ r) := sorry
+theorem example_6 {p q r: Prop} : p ∨ (q ∧ r) ↔ (p ∨ q) ∧ (p ∨ r) := sorry
 
 -- other properties
-example : (p → (q → r)) ↔ (p ∧ q → r) := sorry
-example : ((p ∨ q) → r) ↔ (p → r) ∧ (q → r) := sorry
+theorem example_7 {p q r: Prop} : (p → (q → r)) ↔ (p ∧ q → r) := sorry
+theorem example_8 {p q r: Prop} : ((p ∨ q) → r) ↔ (p → r) ∧ (q → r) := sorry
 
-example : ¬(p ∨ q) ↔ ¬p ∧ ¬q := de_morgan
+theorem example_9 {p q: Prop} : ¬(p ∨ q) ↔ ¬p ∧ ¬q := de_morgan
 
-theorem lem_3 {p q : Prop} : ¬ p → ¬(p ∧ q) :=
+theorem lem_ex_10 {p q : Prop} : ¬ p → ¬(p ∧ q) :=
   λ (hnp: ¬ p) (hpq: (p ∧ q)) => hnp hpq.left
 
-example : ¬p ∨ ¬q → ¬(p ∧ q) :=
+theorem example_10 {p q: Prop} : ¬p ∨ ¬q → ¬(p ∧ q) :=
   λ (h: ¬p ∨ ¬q) =>
-    have impl1 : ¬ p → ¬(p ∧ q) := lem_3
-    -- we get the second case by lem_3 and swapping (lem_1)
+    have impl1 : ¬ p → ¬(p ∧ q) := lem_ex_10
+    -- we get the second case by lem_3 and swapping (example_1)
     have impl2: ¬q → ¬(p ∧ q) := λ (hnq: ¬q) =>
-      have hnqp : ¬(q ∧ p) := lem_3 hnq
-      show ¬(p ∧ q) from λ (hpq: p ∧ q) => hnqp (lem_1 hpq)
+      have hnqp : ¬(q ∧ p) := lem_ex_10 hnq
+      show ¬(p ∧ q) from λ (hpq: p ∧ q) => hnqp (Iff.mp example_1 hpq)
     show ¬(p ∧ q) from Or.elim h impl1 impl2
 
-example : ¬(p ∧ ¬p) :=
+theorem example_11 {p: Prop} : ¬(p ∧ ¬p) :=
   λ (h: p ∧ ¬p) => h.right h.left
 
-example : p ∧ ¬q → ¬(p → q) :=
+theorem example_12 {p q: Prop} : p ∧ ¬q → ¬(p → q) :=
   λ (h: p ∧ ¬ q) (impl: p → q) =>
     have hq: q := impl h.left
     show False from False.elim (h.right hq)
@@ -111,7 +142,7 @@ example : p ∧ ¬q → ¬(p → q) :=
 
 theorem lem_4 {p q : Prop}: ¬p → (p → q) := λ (hnp: ¬ p) (hp: p) => False.elim (hnp hp)
 
-example : (¬p ∨ q) → (p → q) :=
+theorem example_13 {p q: Prop} : (¬p ∨ q) → (p → q) :=
   λ (h : ¬p ∨ q) =>
     suffices impls: (¬ p → (p → q)) ∧ (q → (p → q)) from Or.elim h impls.left impls.right
       have inp: ¬ p → (p → q) := lem_4
@@ -120,7 +151,7 @@ example : (¬p ∨ q) → (p → q) :=
         ⟨inp, iq⟩
 
 
-example : p ∨ False ↔ p :=
+theorem example_14 {p: Prop} : p ∨ False ↔ p :=
   Iff.intro
     (
       λ (h: p ∨ False) =>
@@ -131,8 +162,8 @@ example : p ∨ False ↔ p :=
 
     λ (h: p) => show p ∨ False from Or.inl h
 
-example : p ∧ False ↔ False :=
+theorem example_15 {p: Prop} : p ∧ False ↔ False :=
   Iff.intro (λ (h: p ∧ False) => False.elim h.right) False.elim
 
-example : (p → q) → (¬q → ¬p) :=
+theorem example_16 {p q: Prop} : (p → q) → (¬q → ¬p) :=
   λ (ipq: p → q) (hnq: ¬ q) (hp: p) => hnq (ipq hp)
