@@ -85,12 +85,40 @@ example : p ∨ (q ∧ r) ↔ (p ∨ q) ∧ (p ∨ r) := sorry
 -- other properties
 example : (p → (q → r)) ↔ (p ∧ q → r) := sorry
 example : ((p ∨ q) → r) ↔ (p → r) ∧ (q → r) := sorry
+
 example : ¬(p ∨ q) ↔ ¬p ∧ ¬q := de_morgan
-example : ¬p ∨ ¬q → ¬(p ∧ q) := sorry
-example : ¬(p ∧ ¬p) := sorry
-example : p ∧ ¬q → ¬(p → q) := sorry
-example : ¬p → (p → q) := sorry
-example : (¬p ∨ q) → (p → q) := sorry
+
+theorem lem_3 {p q : Prop} : ¬ p → ¬(p ∧ q) :=
+  λ (hnp: ¬ p) (hpq: (p ∧ q)) => hnp hpq.left
+
+example : ¬p ∨ ¬q → ¬(p ∧ q) :=
+  λ (h: ¬p ∨ ¬q) =>
+    have impl1 : ¬ p → ¬(p ∧ q) := lem_3
+    -- we get the second case by lem_3 and swapping (lem_1)
+    have impl2: ¬q → ¬(p ∧ q) := λ (hnq: ¬q) =>
+      have hnqp : ¬(q ∧ p) := lem_3 hnq
+      show ¬(p ∧ q) from λ (hpq: p ∧ q) => hnqp (lem_1 hpq)
+    show ¬(p ∧ q) from Or.elim h impl1 impl2
+
+example : ¬(p ∧ ¬p) :=
+  λ (h: p ∧ ¬p) => h.right h.left
+
+example : p ∧ ¬q → ¬(p → q) :=
+  λ (h: p ∧ ¬ q) (impl: p → q) =>
+    have hq: q := impl h.left
+    show False from False.elim (h.right hq)
+
+
+theorem lem_4 {p q : Prop}: ¬p → (p → q) := λ (hnp: ¬ p) (hp: p) => False.elim (hnp hp)
+
+example : (¬p ∨ q) → (p → q) :=
+  λ (h : ¬p ∨ q) =>
+    suffices impls: (¬ p → (p → q)) ∧ (q → (p → q)) from Or.elim h impls.left impls.right
+      have inp: ¬ p → (p → q) := lem_4
+      have iq: q → (p → q) := λ (hq: q) (hp: p) => hq
+      show (¬ p → (p → q)) ∧ (q → (p → q)) from
+        ⟨inp, iq⟩
+
 
 example : p ∨ False ↔ p :=
   Iff.intro
