@@ -97,12 +97,17 @@ theorem lem_ex_4 {p q r: Prop} : (p ∨ q) ∨ r → p ∨ (q ∨ r) :=
         have impl2: r → p ∨ (q ∨ r) := λ hr: r => Or.inr (Or.inr hr)
         show p ∨ (q ∨ r) from Or.elim h impl1 impl2
 
+
 theorem example_4 {p q r: Prop} : (p ∨ q) ∨ r ↔ p ∨ (q ∨ r) :=
   Iff.intro
     lem_ex_4
 
     λ h: p ∨ (q ∨ r) =>
-
+    /-
+    Thought: We apply the exact same trick here as in example 3. This screams for abstraction.
+    TODO for the future: Formulate an even more abstract proof for "commutative" operators on propositions
+    (or more generally, types)
+    -/
     have hswap1 : (q ∨ r) ∨ p := Iff.mp example_2 h
       have assoc1: q ∨ (r ∨ p) := lem_ex_4 hswap1
       have hswap2: (r ∨ p) ∨ q := Iff.mp example_2 assoc1
@@ -115,7 +120,17 @@ theorem example_6 {p q r: Prop} : p ∨ (q ∧ r) ↔ (p ∨ q) ∧ (p ∨ r) :=
 
 -- other properties
 theorem example_7 {p q r: Prop} : (p → (q → r)) ↔ (p ∧ q → r) := sorry
-theorem example_8 {p q r: Prop} : ((p ∨ q) → r) ↔ (p → r) ∧ (q → r) := sorry
+
+theorem example_8 {p q r: Prop} : ((p ∨ q) → r) ↔ (p → r) ∧ (q → r) :=
+  Iff.intro
+    (
+      λ h: (p ∨ q) → r =>
+        have impl1: p → r := λ hp : p => h (Or.inl hp)
+        have impl2: q → r := λ hq : q => h (Or.inr hq)
+        show (p → r) ∧ (q → r) from ⟨impl1, impl2⟩
+    )
+
+    λ (h: (p → r) ∧ (q → r)) (hpq: p ∨ q) => Or.elim hpq h.left h.right
 
 theorem example_9 {p q: Prop} : ¬(p ∨ q) ↔ ¬p ∧ ¬q := de_morgan
 
