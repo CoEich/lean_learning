@@ -119,7 +119,11 @@ theorem example_5 {p q r: Prop} : p ∧ (q ∨ r) ↔ (p ∧ q) ∨ (p ∧ r) :=
 theorem example_6 {p q r: Prop} : p ∨ (q ∧ r) ↔ (p ∨ q) ∧ (p ∨ r) := sorry
 
 -- other properties
-theorem example_7 {p q r: Prop} : (p → (q → r)) ↔ (p ∧ q → r) := sorry
+theorem example_7 {p q r: Prop} : (p → (q → r)) ↔ (p ∧ q → r) :=
+  Iff.intro
+      (λ (h: p → (q → r)) (hpq: p ∧ q) => h hpq.left hpq.right )
+
+      (λ (h: p ∧ q → r) (hp: p) (hq: q) => h ⟨hp, hq⟩)
 
 theorem example_8 {p q r: Prop} : ((p ∨ q) → r) ↔ (p → r) ∧ (q → r) :=
   Iff.intro
@@ -155,18 +159,18 @@ theorem example_12 {p q: Prop} : p ∧ ¬q → ¬(p → q) :=
     show False from False.elim (h.right hq)
 
 
-theorem lem_4 {p q : Prop}: ¬p → (p → q) := λ (hnp: ¬ p) (hp: p) => False.elim (hnp hp)
+theorem example_13 {p q : Prop}: ¬p → (p → q) := λ (hnp: ¬ p) (hp: p) => False.elim (hnp hp)
 
-theorem example_13 {p q: Prop} : (¬p ∨ q) → (p → q) :=
+theorem example_14 {p q: Prop} : (¬p ∨ q) → (p → q) :=
   λ (h : ¬p ∨ q) =>
     suffices impls: (¬ p → (p → q)) ∧ (q → (p → q)) from Or.elim h impls.left impls.right
-      have inp: ¬ p → (p → q) := lem_4
+      have inp: ¬ p → (p → q) := example_13
       have iq: q → (p → q) := λ (hq: q) (hp: p) => hq
       show (¬ p → (p → q)) ∧ (q → (p → q)) from
         ⟨inp, iq⟩
 
 
-theorem example_14 {p: Prop} : p ∨ False ↔ p :=
+theorem example_15 {p: Prop} : p ∨ False ↔ p :=
   Iff.intro
     (
       λ (h: p ∨ False) =>
@@ -177,8 +181,17 @@ theorem example_14 {p: Prop} : p ∨ False ↔ p :=
 
     λ (h: p) => show p ∨ False from Or.inl h
 
-theorem example_15 {p: Prop} : p ∧ False ↔ False :=
+theorem example_16 {p: Prop} : p ∧ False ↔ False :=
   Iff.intro (λ (h: p ∧ False) => False.elim h.right) False.elim
 
-theorem example_16 {p q: Prop} : (p → q) → (¬q → ¬p) :=
+theorem example_17 {p: Prop} : ¬ (p ↔ ¬ p) :=
+  λ h : p ↔ ¬ p =>
+    have limpl: p → ¬ p := h.mp
+    have rimpl: ¬ p → p := h.mpr
+    have hnp : ¬ p := λ hp: p => limpl hp hp
+    have hp: p := rimpl hnp
+    -- absurd is just the theorem p → ¬p → False
+    show False from absurd hp hnp
+
+theorem example_18 {p q: Prop} : (p → q) → (¬q → ¬p) :=
   λ (ipq: p → q) (hnq: ¬ q) (hp: p) => hnq (ipq hp)
