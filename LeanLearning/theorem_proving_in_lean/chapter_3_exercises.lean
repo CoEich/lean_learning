@@ -5,6 +5,7 @@ set_option linter.unusedVariables false
  theorem de_morgan {p q: Prop} : ¬ (p ∨ q) ↔ ¬ p ∧ ¬ q :=
   -- we need to provide two proofs as arguments to 'Iff.intro'
   Iff.intro
+
     (
       λ (f: ¬ (p ∨ q)) ↦
         -- we are gonna construct terms for not p, not q respecively and apply the and constructor
@@ -21,6 +22,7 @@ set_option linter.unusedVariables false
 
         show ¬ p ∧ ¬ q from ⟨hnp, hnq⟩
     )
+
     (
       λ (h : ¬ p ∧ ¬ q) ↦
         have hnp: ¬ p := h.left
@@ -68,24 +70,26 @@ theorem lem_prop_3 {p q r: Prop} : (p ∧ q) ∧ r → p ∧ (q ∧ r) :=
 
 theorem property_3 {p q r: Prop} : (p ∧ q) ∧ r ↔ p ∧ (q ∧ r) :=
   Iff.intro
+
     lem_prop_3
 
-    λ h: p ∧ (q ∧ r) ↦
+    (
+      λ h: p ∧ (q ∧ r) ↦
 
-      /- Solution 1: copy paste lem_prop_3 more or less
-      have hp: p := h.left
-      have hq: q := h.right.left
-      have hr: r := h.right.right
-      -- note: ⟨hp, hq, hr⟩ does not work here
-      show (p ∧ q) ∧ r from ⟨⟨ hp, hq⟩ , hr⟩ -/
+        /- Solution 1: copy paste lem_prop_3 more or less
+        have hp: p := h.left
+        have hq: q := h.right.left
+        have hr: r := h.right.right
+        -- note: ⟨hp, hq, hr⟩ does not work here
+        show (p ∧ q) ∧ r from ⟨⟨ hp, hq⟩ , hr⟩ -/
 
-      -- Solution 2: Be more cool and use lemmas and theorems we already have :-)
-      have hswap1 : (q ∧ r) ∧ p := Iff.mp property_1 h
-      have assoc1: q ∧ (r ∧ p) := lem_prop_3 hswap1
-      have hswap2: (r ∧ p) ∧ q := Iff.mp property_1 assoc1
-      have assoc2: r ∧ (p ∧ q) := lem_prop_3 hswap2
-      show (p ∧ q) ∧ r from Iff.mp property_1 assoc2
-
+        -- Solution 2: Be more cool and use lemmas and theorems we already have :-)
+        have hswap1 : (q ∧ r) ∧ p := Iff.mp property_1 h
+        have assoc1: q ∧ (r ∧ p) := lem_prop_3 hswap1
+        have hswap2: (r ∧ p) ∧ q := Iff.mp property_1 assoc1
+        have assoc2: r ∧ (p ∧ q) := lem_prop_3 hswap2
+        show (p ∧ q) ∧ r from Iff.mp property_1 assoc2
+    )
 
 -- same strategy as before
 theorem lem_prop_4 {p q r: Prop} : (p ∨ q) ∨ r → p ∨ (q ∨ r) :=
@@ -100,55 +104,61 @@ theorem lem_prop_4 {p q r: Prop} : (p ∨ q) ∨ r → p ∨ (q ∨ r) :=
 
 theorem property_4 {p q r: Prop} : (p ∨ q) ∨ r ↔ p ∨ (q ∨ r) :=
   Iff.intro
+
     lem_prop_4
 
-    λ h: p ∨ (q ∨ r) ↦
-    /-
-    Thought: We apply the exact same trick here as in property 3. This screams for abstraction.
-    TODO for the future: Formulate an even more abstract proof for "commutative" operators on propositions
-    (or more generally, types)
-    -/
-    have hswap1 : (q ∨ r) ∨ p := Iff.mp property_2 h
-      have assoc1: q ∨ (r ∨ p) := lem_prop_4 hswap1
-      have hswap2: (r ∨ p) ∨ q := Iff.mp property_2 assoc1
-      have assoc2: r ∨ (p ∨ q) := lem_prop_4 hswap2
-      show (p ∨ q) ∨ r from Iff.mp property_2 assoc2
+    (
+      λ h: p ∨ (q ∨ r) ↦
+      /-
+      Thought: We apply the exact same trick here as in property 3. This screams for abstraction.
+      TODO for the future: Formulate an even more abstract proof for "commutative" operators on propositions
+      (or more generally, types)
+      -/
+      have hswap1 : (q ∨ r) ∨ p := Iff.mp property_2 h
+        have assoc1: q ∨ (r ∨ p) := lem_prop_4 hswap1
+        have hswap2: (r ∨ p) ∨ q := Iff.mp property_2 assoc1
+        have assoc2: r ∨ (p ∨ q) := lem_prop_4 hswap2
+        show (p ∨ q) ∨ r from Iff.mp property_2 assoc2
+    )
 
 -- distributivity
 theorem property_5 {p q r: Prop} : p ∧ (q ∨ r) ↔ (p ∧ q) ∨ (p ∧ r) :=
   Iff.intro
 
-  (
-    λ h: p ∧ (q ∨ r) ↦
-      -- auxiliary implication which "moves the p to the right" so we can apply Or.elim
-      have f : (q ∨ r) → (p → (p ∧ q) ∨ (p ∧ r)) := λ hqr : (q ∨ r) ↦
-        have impl1: q → (p → (p ∧ q) ∨ (p ∧ r)) := λ (hq: q) (hp: p) ↦ Or.inl ⟨hp, hq⟩
-        have impl2: r → (p → (p ∧ q) ∨ (p ∧ r)) := λ (hr: r) (hp: p) ↦ Or.inr ⟨hp, hr⟩
-        show (p → (p ∧ q) ∨ (p ∧ r)) from Or.elim hqr impl1 impl2
-      have hp : p := h.left
-      have hqr : (q ∨ r) := h.right
-      show (p ∧ q) ∨ (p ∧ r) from f hqr hp
-  )
+    (
+      λ h: p ∧ (q ∨ r) ↦
+        -- auxiliary implication which "moves the p to the right" so we can apply Or.elim
+        have f : (q ∨ r) → (p → (p ∧ q) ∨ (p ∧ r)) := λ hqr : (q ∨ r) ↦
+          have impl1: q → (p → (p ∧ q) ∨ (p ∧ r)) := λ (hq: q) (hp: p) ↦ Or.inl ⟨hp, hq⟩
+          have impl2: r → (p → (p ∧ q) ∨ (p ∧ r)) := λ (hr: r) (hp: p) ↦ Or.inr ⟨hp, hr⟩
+          show (p → (p ∧ q) ∨ (p ∧ r)) from Or.elim hqr impl1 impl2
+        have hp : p := h.left
+        have hqr : (q ∨ r) := h.right
+        show (p ∧ q) ∨ (p ∧ r) from f hqr hp
+    )
 
-  (
-    λ h: (p ∧ q) ∨ (p ∧ r) ↦
-      have impl1: (p ∧ q) → p ∧ (q ∨ r) := λ hpq : p ∧ q ↦ ⟨hpq.left, Or.inl hpq.right⟩
-      have impl2: (p ∧ r) → p ∧ (q ∨ r) := λ hpr : p ∧ r ↦ ⟨hpr.left, Or.inr hpr.right⟩
-      show p ∧ (q ∨ r) from Or.elim h impl1 impl2
-  )
+    (
+      λ h: (p ∧ q) ∨ (p ∧ r) ↦
+        have impl1: (p ∧ q) → p ∧ (q ∨ r) := λ hpq : p ∧ q ↦ ⟨hpq.left, Or.inl hpq.right⟩
+        have impl2: (p ∧ r) → p ∧ (q ∨ r) := λ hpr : p ∧ r ↦ ⟨hpr.left, Or.inr hpr.right⟩
+        show p ∧ (q ∨ r) from Or.elim h impl1 impl2
+    )
 
 
 theorem property_6 {p q r: Prop} : p ∨ (q ∧ r) ↔ (p ∨ q) ∧ (p ∨ r) := sorry
 
+
 -- other properties
 theorem property_7 {p q r: Prop} : (p → (q → r)) ↔ (p ∧ q → r) :=
   Iff.intro
-      (λ (h: p → (q → r)) (hpq: p ∧ q) ↦ h hpq.left hpq.right )
 
-      (λ (h: p ∧ q → r) (hp: p) (hq: q) ↦ h ⟨hp, hq⟩)
+    (λ (h: p → (q → r)) (hpq: p ∧ q) ↦ h hpq.left hpq.right )
+
+    (λ (h: p ∧ q → r) (hp: p) (hq: q) ↦ h ⟨hp, hq⟩)
 
 theorem property_8 {p q r: Prop} : ((p ∨ q) → r) ↔ (p → r) ∧ (q → r) :=
   Iff.intro
+
     (
       λ h: (p ∨ q) → r ↦
         have impl1: p → r := λ hp : p ↦ h (Or.inl hp)
@@ -194,6 +204,7 @@ theorem property_14 {p q: Prop} : (¬p ∨ q) → (p → q) :=
 
 theorem property_15 {p: Prop} : p ∨ False ↔ p :=
   Iff.intro
+
     (
       λ (h: p ∨ False) ↦
       have c1: p → p := id
