@@ -115,7 +115,29 @@ theorem property_4 {p q r: Prop} : (p ∨ q) ∨ r ↔ p ∨ (q ∨ r) :=
       show (p ∨ q) ∨ r from Iff.mp property_2 assoc2
 
 -- distributivity
-theorem property_5 {p q r: Prop} : p ∧ (q ∨ r) ↔ (p ∧ q) ∨ (p ∧ r) := sorry
+theorem property_5 {p q r: Prop} : p ∧ (q ∨ r) ↔ (p ∧ q) ∨ (p ∧ r) :=
+  Iff.intro
+
+  (
+    λ h: p ∧ (q ∨ r) ↦
+      -- auxiliary implication which "moves the p to the right" so we can apply Or.elim
+      have f : (q ∨ r) → (p → (p ∧ q) ∨ (p ∧ r)) := λ hqr : (q ∨ r) ↦
+        have impl1: q → (p → (p ∧ q) ∨ (p ∧ r)) := λ (hq: q) (hp: p) ↦ Or.inl ⟨hp, hq⟩
+        have impl2: r → (p → (p ∧ q) ∨ (p ∧ r)) := λ (hr: r) (hp: p) ↦ Or.inr ⟨hp, hr⟩
+        show (p → (p ∧ q) ∨ (p ∧ r)) from Or.elim hqr impl1 impl2
+      have hp : p := h.left
+      have hqr : (q ∨ r) := h.right
+      show (p ∧ q) ∨ (p ∧ r) from f hqr hp
+  )
+
+  (
+    λ h: (p ∧ q) ∨ (p ∧ r) ↦
+      have impl1: (p ∧ q) → p ∧ (q ∨ r) := λ hpq : p ∧ q ↦ ⟨hpq.left, Or.inl hpq.right⟩
+      have impl2: (p ∧ r) → p ∧ (q ∨ r) := λ hpr : p ∧ r ↦ ⟨hpr.left, Or.inr hpr.right⟩
+      show p ∧ (q ∨ r) from Or.elim h impl1 impl2
+  )
+
+
 theorem property_6 {p q r: Prop} : p ∨ (q ∧ r) ↔ (p ∨ q) ∧ (p ∨ r) := sorry
 
 -- other properties
