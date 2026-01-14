@@ -267,7 +267,25 @@ theorem property_18 {p q: Prop} : (p → q) → (¬q → ¬p) :=
 
 open Classical
 
-theorem property_19 {p q r: Prop} : (p → q ∨ r) → ((p → q) ∨ (p → r)) := sorry
+theorem pf_by_contr {p: Prop}: ¬ ¬ p → p :=
+  λ h : ¬ ¬ p ↦
+    have emp : p ∨ ¬ p := em p
+    have f : ¬ p → p := λ hnp : ¬ p ↦ absurd hnp h
+    show p from Or.elim emp id f
+
+theorem property_19 {p q r: Prop} : (p → q ∨ r) → ((p → q) ∨ (p → r)) :=
+  λ h : (p → q ∨ r) ↦
+    have emq : q ∨ ¬ q := em q
+    have impl1 : q → (p → q) ∨ (p → r) := λ hq : q ↦  Or.inl (λ (hp : p) ↦ hq )
+    have impl2 : ¬ q → (p → q) ∨ (p → r) := λ hnq : ¬ q ↦
+      Or.inr
+        λ hp : p ↦
+          have hqr : q ∨ r := h hp
+          have implq: q → r := λ hq :q ↦ absurd hq hnq
+          show r from Or.elim hqr implq id
+    show (p → q) ∨ (p → r) from Or.elim emq impl1 impl2
+
+
 theorem property_20 {p q: Prop} : ¬(p ∧ q) → ¬p ∨ ¬q := sorry
 theorem property_21 {p q: Prop} : ¬(p → q) → p ∧ ¬q := sorry
 theorem property_22 {p q: Prop} : (p → q) → (¬p ∨ q) := sorry
