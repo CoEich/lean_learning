@@ -145,7 +145,40 @@ theorem property_5 {p q r: Prop} : p ∧ (q ∨ r) ↔ (p ∧ q) ∨ (p ∧ r) :
     )
 
 
-theorem property_6 {p q r: Prop} : p ∨ (q ∧ r) ↔ (p ∨ q) ∧ (p ∨ r) := sorry
+theorem property_6 {p q r: Prop} : p ∨ (q ∧ r) ↔ (p ∨ q) ∧ (p ∨ r) :=
+  Iff.intro
+
+    (
+      λ h : p ∨ (q ∧ r) ↦
+        have impl1: p → (p ∨ q) ∧ (p ∨ r) := λ hp : p ↦ ⟨Or.inl hp, Or.inl hp⟩
+        have impl2: (q ∧ r) → (p ∨ q) ∧ (p ∨ r) := λ hqr : q ∧ r ↦ ⟨Or.inr hqr.left, Or.inr hqr.right⟩
+        show (p ∨ q) ∧ (p ∨ r) from Or.elim h impl1 impl2
+    )
+
+    (
+      λ h : (p ∨ q) ∧ (p ∨ r) ↦
+        -- auxiliary statement similar to the one used in property 5
+        have f: (p ∨ q) → (p ∨ r) → p ∨ (q ∧ r) := λ hpq: p ∨ q ↦
+
+          -- If p holds, then p ∨ (q ∧ r)
+          have implp: p → p ∨ (q ∧ r) := λ (hp : p) ↦ Or.inl hp
+
+          -- If q and r hold, then p ∨ (q ∧ r)
+          have implqr : q → r → p ∨ (q ∧ r) := λ (hq: q) (hr: r) ↦ Or.inr ⟨hq, hr⟩
+
+          -- go through case distinctions to apply Or.elim
+          have impl1: p → (p ∨ r) → p ∨ (q ∧ r) := λ (hp: p) (hpr: (p ∨ r)) ↦ implp hp
+          have impl2: q → (p ∨ r) → p ∨ (q ∧ r) := λ (hq: q) (hpr: (p ∨ r)) ↦
+            have impl21: p → p ∨ (q ∧ r) := implp
+            have impl22: r → p ∨ (q ∧ r) := λ hr: r ↦ implqr hq hr
+            show p ∨ (q ∧ r) from Or.elim hpr impl21 impl22
+          show (p ∨ r) → p ∨ (q ∧ r) from Or.elim hpq impl1 impl2
+
+        -- show actual statement
+        have hpq: p ∨ q := h.left
+        have hpr: p ∨ r := h.right
+        show p ∨ (q ∧ r) from f hpq hpr
+    )
 
 
 -- other properties
@@ -228,3 +261,16 @@ theorem property_17 {p: Prop} : ¬ (p ↔ ¬ p) :=
 
 theorem property_18 {p q: Prop} : (p → q) → (¬q → ¬p) :=
   λ (ipq: p → q) (hnq: ¬ q) (hp: p) ↦ hnq (ipq hp)
+
+
+-- Classical properties
+
+open Classical
+
+theorem property_19 {p q r: Prop} : (p → q ∨ r) → ((p → q) ∨ (p → r)) := sorry
+theorem property_20 {p q: Prop} : ¬(p ∧ q) → ¬p ∨ ¬q := sorry
+theorem property_21 {p q: Prop} : ¬(p → q) → p ∧ ¬q := sorry
+theorem property_22 {p q: Prop} : (p → q) → (¬p ∨ q) := sorry
+theorem property_23 {q p: Prop} : (¬q → ¬p) → (p → q) := sorry
+theorem property_24 {p: Prop} : p ∨ ¬p := sorry
+theorem property_25 {p q: Prop} : (((p → q) → p) → p) := sorry
