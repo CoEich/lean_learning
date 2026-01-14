@@ -275,8 +275,15 @@ theorem pf_by_contr {p: Prop}: ¬ ¬ p → p :=
 
 theorem property_19 {p q r: Prop} : (p → q ∨ r) → ((p → q) ∨ (p → r)) :=
   λ h : (p → q ∨ r) ↦
+    /- strategy is to use em and Or.elim after showing that
+      q and ¬ q both imply the desired result
+    -/
     have emq : q ∨ ¬ q := em q
+    -- this implication is rather trivial
     have impl1 : q → (p → q) ∨ (p → r) := λ hq : q ↦  Or.inl (λ (hp : p) ↦ hq )
+    /- the other implication is more complicated. Intuitively,
+      if p implies q ∨ r and we have ¬ q, then r must follow from p.
+    -/
     have impl2 : ¬ q → (p → q) ∨ (p → r) := λ hnq : ¬ q ↦
       Or.inr
         λ hp : p ↦
@@ -286,7 +293,16 @@ theorem property_19 {p q r: Prop} : (p → q ∨ r) → ((p → q) ∨ (p → r)
     show (p → q) ∨ (p → r) from Or.elim emq impl1 impl2
 
 
-theorem property_20 {p q: Prop} : ¬(p ∧ q) → ¬p ∨ ¬q := sorry
+theorem property_20 {p q: Prop} : ¬(p ∧ q) → ¬p ∨ ¬q :=
+  λ h : ¬(p ∧ q) ↦
+    have emp : p ∨ ¬ p := em p
+    have impl1 : p → ¬p ∨ ¬q := λ hp : p ↦
+      Or.inr
+        λ hq : q ↦ h ⟨hp, hq⟩
+    have impl2 : ¬ p → ¬p ∨ ¬q := λ hnp : ¬ p ↦ Or.inl hnp
+    show ¬p ∨ ¬q from Or.elim emp impl1 impl2
+
+
 theorem property_21 {p q: Prop} : ¬(p → q) → p ∧ ¬q := sorry
 theorem property_22 {p q: Prop} : (p → q) → (¬p ∨ q) := sorry
 theorem property_23 {q p: Prop} : (¬q → ¬p) → (p → q) := sorry
