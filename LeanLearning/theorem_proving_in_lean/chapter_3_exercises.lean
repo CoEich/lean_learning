@@ -256,14 +256,14 @@ theorem property_17 {p: Prop} : ¬ (p ↔ ¬ p) :=
     have rimpl: ¬ p → p := h.mpr
     have hnp : ¬ p := λ hp: p ↦ limpl hp hp
     have hp: p := rimpl hnp
-    -- absurd is just the theorem p → ¬p → False
+    -- absurd is just the theorem p → ¬p → q for any q
     show False from absurd hp hnp
 
 theorem property_18 {p q: Prop} : (p → q) → (¬q → ¬p) :=
   λ (ipq: p → q) (hnq: ¬ q) (hp: p) ↦ hnq (ipq hp)
 
 
--- Classical properties
+-- Properties relying on law of excluded middle
 
 open Classical
 
@@ -303,8 +303,28 @@ theorem property_20 {p q: Prop} : ¬(p ∧ q) → ¬p ∨ ¬q :=
     show ¬p ∨ ¬q from Or.elim emp impl1 impl2
 
 
-theorem property_21 {p q: Prop} : ¬(p → q) → p ∧ ¬q := sorry
+theorem property_21 {p q: Prop} : ¬(p → q) → p ∧ ¬q :=
+  λ h : ¬(p → q) ↦
+    -- first show that p holds
+    have emp : p ∨ ¬ p := em p
+    have idp : p → p := id
+    have implnp: ¬ p → p := λ hnp : ¬ p ↦
+      have hn : p → q := λ hp : p ↦ absurd hp hnp
+      show p from absurd hn h
+    have hp : p := Or.elim emp idp implnp
+
+    -- then show that ¬ q holds, using that p holds
+    have emq : q ∨ ¬ q := em q
+    have idnq : ¬ q → ¬ q := id
+    have implq: q → ¬ q := λ hq : q ↦
+      have hn : p → q := λ hp : p ↦ hq
+      show ¬ q from absurd hn h
+    have hnq : ¬ q := Or.elim emq implq idnq
+
+    show p ∧ ¬q from ⟨hp, hnq⟩
+
+
 theorem property_22 {p q: Prop} : (p → q) → (¬p ∨ q) := sorry
 theorem property_23 {q p: Prop} : (¬q → ¬p) → (p → q) := sorry
-theorem property_24 {p: Prop} : p ∨ ¬p := sorry
+theorem property_24 {p: Prop} : p ∨ ¬p := em p
 theorem property_25 {p q: Prop} : (((p → q) → p) → p) := sorry
