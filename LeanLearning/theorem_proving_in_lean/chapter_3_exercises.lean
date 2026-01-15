@@ -324,7 +324,30 @@ theorem property_21 {p q: Prop} : ¬(p → q) → p ∧ ¬q :=
     show p ∧ ¬q from ⟨hp, hnq⟩
 
 
-theorem property_22 {p q: Prop} : (p → q) → (¬p ∨ q) := sorry
-theorem property_23 {q p: Prop} : (¬q → ¬p) → (p → q) := sorry
+theorem property_22 {p q: Prop} : (p → q) → (¬p ∨ q) :=
+  λ h : (p → q) ↦
+    have emq : q ∨ ¬ q := em q
+    have impl1: q → (¬p ∨ q) := λ hq : q ↦ Or.inr hq
+    have impl2: ¬ q → (¬ p ∨ q) := λ hnq : ¬ q ↦
+      Or.inl (λ hp : p ↦ hnq (h hp))
+    show (¬p ∨ q) from Or.elim emq impl1 impl2
+
+theorem property_23 {q p: Prop} : (¬q → ¬p) → (p → q) :=
+  λ (h : (¬q → ¬p)) (hp : p) ↦
+    have emq : q ∨ ¬ q := em q
+    have impl1 : q → q := id
+    have impl2 : ¬ q → q := λ hnq : ¬ q ↦
+      have hnp : ¬ p := h hnq
+      show q from absurd hp hnp
+    show q from Or.elim emq impl1 impl2
+
 theorem property_24 {p: Prop} : p ∨ ¬p := em p
-theorem property_25 {p q: Prop} : (((p → q) → p) → p) := sorry
+
+theorem property_25 {p q: Prop} : ((p → q) → p) → p :=
+  λ h: (p → q) → p ↦
+    have emp : p ∨ ¬ p := em p
+    have impl1: p → p := id
+    have impl2: ¬ p → p := λ hnp: ¬ p ↦
+      have f : ¬ (p → q) := λ hpq: p → q ↦ hnp (h hpq)
+      show p from (property_21 f).left
+    show p from Or.elim emp impl1 impl2
