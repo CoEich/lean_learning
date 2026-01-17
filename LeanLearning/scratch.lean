@@ -40,3 +40,15 @@ def im_three : True := True.intro
 
 def g : Test → True := Test.rec im_one im_two im_three
 #check Test.rec
+
+inductive N where
+  | zero : N
+  | succ : N → N
+
+#check N.rec
+
+inductive NN where
+  | zero : NN
+  | ssucc : NN → NN → NN
+
+#check NN.rec

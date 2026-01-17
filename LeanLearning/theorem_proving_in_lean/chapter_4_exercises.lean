@@ -29,9 +29,17 @@ The barber paradox
 
 variable (men : Type) (barber : men)
 variable (shaves : men → men → Prop)
+open Classical
 
 example (h : ∀ x : men, shaves barber x ↔ ¬ shaves x x) : False :=
-  sorry
+  have hb : shaves barber barber ∨ ¬ shaves barber barber := em (shaves barber barber)
+  have case1 : shaves barber barber → False := λ hpos : shaves barber barber ↦
+    have hn : ¬ shaves barber barber := (h barber).mp hpos
+    show False from hn hpos
+  have case2 : ¬ shaves barber barber → False := λ hn: ¬ shaves barber barber ↦
+    have hpos : shaves barber barber := (h barber).mpr hn
+    show False from hn hpos
+  show False from Or.elim hb case1 case2
 
 /- Exercise 4
 Properly formulate all of the below propositions
