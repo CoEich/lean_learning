@@ -28,3 +28,15 @@ def f (α : Type u) (β : α → Type v) (a : α) (b : β a) : (a : α) × β a 
   ⟨a, b⟩
 
 #check f
+
+inductive Test where
+  | one : Test
+  | two : Test
+  | three : Test
+
+def im_one : True := True.intro
+def im_two : True := True.intro
+def im_three : True := True.intro
+
+def g : Test → True := Test.rec im_one im_two im_three
+#check Test.rec
