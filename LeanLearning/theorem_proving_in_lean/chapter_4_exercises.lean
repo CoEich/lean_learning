@@ -1,7 +1,19 @@
 /- Exercise 1 -/
 
 theorem fa_property_1 {α : Type} {p q : α → Prop} :
-(∀ x : α, p x ∧ q x) ↔ (∀ x : α, p x) ∧ (∀ x : α, q x) := sorry
+(∀ x : α, p x ∧ q x) ↔ (∀ x : α, p x) ∧ (∀ x : α, q x) :=
+  Iff.intro
+
+    (
+      λ h : ∀ x : α, p x ∧ q x ↦
+        have f₁ : (x : α) → p x := λ x : α ↦ (h x).left
+        have f₂ : (x : α) → q x := λ x : α ↦ (h x).right
+        show (∀ x : α, p x) ∧ (∀ x : α, q x) from ⟨f₁, f₂⟩
+    )
+
+    (
+      λ (h : (∀ x : α, p x) ∧ (∀ x : α, q x)) (x : α) ↦ ⟨h.left x, h.right x⟩
+    )
 
 theorem fa_property_2 {α : Type} {p q : α → Prop} :
 (∀ x : α, p x → q x) → (∀ x : α, p x) → (∀ x : α, q x) := sorry
