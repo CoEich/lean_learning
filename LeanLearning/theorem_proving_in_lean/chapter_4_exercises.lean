@@ -16,10 +16,15 @@ theorem fa_property_1 {α : Type} {p q : α → Prop} :
     )
 
 theorem fa_property_2 {α : Type} {p q : α → Prop} :
-(∀ x : α, p x → q x) → (∀ x : α, p x) → (∀ x : α, q x) := sorry
+(∀ x : α, p x → q x) → (∀ x : α, p x) → (∀ x : α, q x) :=
+  λ (h : ∀ x : α, p x → q x) (hp: ∀ x : α, p x) (x : α) ↦ (h x) (hp x)
 
 theorem fa_property_3 {α : Type} {p q : α → Prop} :
-(∀ x : α, p x) ∨ (∀ x : α, q x) → ∀ x : α, p x ∨ q x := sorry
+(∀ x : α, p x) ∨ (∀ x : α, q x) → ∀ x : α, p x ∨ q x :=
+  λ h : (∀ x : α, p x) ∨ (∀ x : α, q x) ↦
+    have impl1: (∀ x : α, p x) → ∀ x : α, p x ∨ q x := λ (hp : ∀ x : α, p x) (x : α) ↦ Or.inl (hp x)
+    have impl2: (∀ x : α, q x) → ∀ x : α, p x ∨ q x := λ (hq : ∀ x : α, q x) (x : α) ↦ Or.inr (hq x)
+    show ∀ x : α, p x ∨ q x from Or.elim h impl1 impl2
 
 /- Exercise 2 -/
 
