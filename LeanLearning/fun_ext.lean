@@ -7,17 +7,21 @@ universe u v
 
 variable {α : Sort u} {β : α → Sort v}
 
+-- Define the relation of extensional equality
 def ext_eq (f₁ f₂ : (x : α) → β x) : Prop := ∀ x : α, f₁ x = f₂ x
 
+-- Construct the function application map from Quot ext_eq to (x : α) → β x which sends ([f], x) to f x.
 def fun_appl_quot (g : Quot (@ext_eq α β)) (x : α) : β x :=
+  -- Step 1: Define appl_x that sends f to f x
   let appl_x : ((y : α) → β y) → β x := λ f ↦ f x   -- TODO: 'have' does not work here, but 'let' does. Don't really understand why.
+  -- Step 2: Prove that appl_x respects functional equality
   have hquot : ∀ f₁ f₂ : (y : α) → β y, ext_eq f₁ f₂ →  appl_x f₁ = appl_x f₂ :=
     λ (f₁ f₂ : (y : α) → β y) (h : ext_eq f₁ f₂) ↦
       calc
         appl_x f₁ = f₁ x := rfl
         _    = f₂ x := h x
         _    = appl_x f₂ := rfl
-
+  -- Step 3: Lift appl_x to Quot ext_eq
   Quot.lift appl_x hquot g
 
 theorem fun_ext (f₁ f₂ : (x : α) → β x) : ext_eq f₁ f₂ → f₁ = f₂ :=

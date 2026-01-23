@@ -1,3 +1,6 @@
+set_option linter.unusedVariables false
+open Classical
+
 /- Exercise 1 -/
 
 theorem fa_property_1 {α : Type} {p q : α → Prop} :
@@ -28,14 +31,40 @@ theorem fa_property_3 {α : Type} {p q : α → Prop} :
 
 /- Exercise 2 -/
 
-variable (α : Type) (p q : α → Prop)
-variable (r : Prop)
+theorem fa_property_4 {α : Type} {r : Prop} :
+α → ((∀ x : α, r) ↔ r) := λ x : α ↦
+  Iff.intro
 
-theorem fa_property_4 {α : Type} {p q : α → Prop} {r : Prop} :
-α → ((∀ x : α, r) ↔ r) := sorry
+    (λ h : (∀ x : α, r) ↦ h x)
 
-theorem fa_property_5 {α : Type} {p q : α → Prop} {r : Prop} :
-(∀ x : α, p x ∨ r) ↔ (∀ x : α, p x) ∨ r := sorry
+    (λ (hr : r) (y : α) ↦ hr)
+
+theorem lem_fa_prop_5 {p q : Prop} : (p ∨ q) → ¬ q → p :=
+ λ (hpq : p ∨ q) (hnq: ¬ q) ↦
+  have impl1: p → p := id
+  have impl2: q → p := λ hq : q ↦ absurd hq hnq
+  show p from Or.elim hpq impl1 impl2
+
+theorem fa_property_5 {α : Type} {p : α → Prop} {r : Prop} :
+(∀ x : α, p x ∨ r) ↔ (∀ x : α, p x) ∨ r :=
+  Iff.intro
+
+    (
+      λ h : (∀ x : α, p x ∨ r) ↦
+        have emr : r ∨ ¬ r := em r
+        have impl1: r → (∀ x : α, p x) ∨ r := λ hr : r ↦ Or.inr hr
+        have impl2: ¬ r → (∀ x : α, p x) ∨ r := λ hnr : ¬ r ↦
+          have hpx : (∀ x : α, p x) := λ x : α ↦ lem_fa_prop_5 (h x) hnr
+          show (∀ x : α, p x) ∨ r from Or.inl hpx
+        show (∀ x : α, p x) ∨ r from Or.elim emr impl1 impl2
+    )
+
+    (
+      λ h : (∀ x : α, p x) ∨ r ↦
+        have impl1: (∀ x : α, p x) → (∀ x : α, p x ∨ r) := λ (hpx: (∀ x : α, p x)) (x : α) ↦ Or.inl (hpx x)
+        have impl2: r → (∀ x : α, p x ∨ r) := λ (hr : r) (x : α) ↦ Or.inr hr
+        show (∀ x : α, p x ∨ r) from Or.elim h impl1 impl2
+    )
 
 theorem fa_property_6 {α : Type} {p q : α → Prop} {r : Prop} :
 (∀ x : α, r → p x) ↔ (r → ∀ x : α, p x) := sorry
@@ -46,7 +75,6 @@ The barber paradox
 
 variable (men : Type) (barber : men)
 variable (shaves : men → men → Prop)
-open Classical
 
 example (h : ∀ x : men, shaves barber x ↔ ¬ shaves x x) : False :=
   have hb : shaves barber barber ∨ ¬ shaves barber barber := em (shaves barber barber)
@@ -79,8 +107,6 @@ def Goldbach's_weak_conjecture : Prop := sorry
 def Fermat's_last_theorem : Prop := sorry
 
 /- Exercise 5 -/
-
-open Classical
 
 theorem e_property_1 {α : Type} {r : Prop} :
 (∃ x : α, r) → r := sorry
