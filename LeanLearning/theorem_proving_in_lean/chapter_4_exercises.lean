@@ -40,10 +40,10 @@ theorem fa_property_4 {α : Type} {r : Prop} :
     (λ (hr : r) (y : α) ↦ hr)
 
 theorem lem_fa_prop_5 {p q : Prop} : (p ∨ q) → ¬ q → p :=
- λ (hpq : p ∨ q) (hnq: ¬ q) ↦
-  have impl1: p → p := id
-  have impl2: q → p := λ hq : q ↦ absurd hq hnq
-  show p from Or.elim hpq impl1 impl2
+  λ (hpq : p ∨ q) (hnq: ¬ q) ↦
+    have impl1: p → p := id
+    have impl2: q → p := λ hq : q ↦ absurd hq hnq
+    show p from Or.elim hpq impl1 impl2
 
 theorem fa_property_5 {α : Type} {p : α → Prop} {r : Prop} :
 (∀ x : α, p x ∨ r) ↔ (∀ x : α, p x) ∨ r :=
@@ -66,8 +66,17 @@ theorem fa_property_5 {α : Type} {p : α → Prop} {r : Prop} :
         show (∀ x : α, p x ∨ r) from Or.elim h impl1 impl2
     )
 
-theorem fa_property_6 {α : Type} {p q : α → Prop} {r : Prop} :
-(∀ x : α, r → p x) ↔ (r → ∀ x : α, p x) := sorry
+theorem fa_property_6 {α : Type} {p : α → Prop} {r : Prop} :
+(∀ x : α, r → p x) ↔ (r → ∀ x : α, p x) :=
+  Iff.intro
+
+    (
+      λ (h : (∀ x : α, r → p x)) (hr : r) (x : α) ↦ h x hr
+    )
+
+    (
+      λ (h : (r → ∀ x : α, p x)) (x : α) (hr : r) ↦ h hr x
+    )
 
 /- Exercise 3
 The barber paradox
