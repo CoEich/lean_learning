@@ -117,14 +117,40 @@ def Fermat's_last_theorem : Prop := sorry
 
 /- Exercise 5 -/
 
+#check Exists.elim
+
 theorem e_property_1 {α : Type} {r : Prop} :
-(∃ x : α, r) → r := sorry
+(∃ x : α, r) → r := λ h : (∃ x : α, r) ↦
+  Exists.elim h
+    (
+      λ (y : α) (hr : r) ↦ hr
+    )
 
 theorem e_property_2 {α : Type} {r : Prop} (a : α) :
-r → (∃ x : α, r) := sorry
+r → (∃ x : α, r) := λ hr : r ↦ ⟨a, hr⟩
 
 theorem e_property_3 {α : Type} {p : α → Prop} {r : Prop} :
-(∃ x : α, p x ∧ r) ↔ (∃ x : α, p x) ∧ r := sorry
+(∃ x : α, p x ∧ r) ↔ (∃ x : α, p x) ∧ r :=
+  Iff.intro
+
+    (
+      λ h : (∃ x : α, p x ∧ r) ↦
+        -- use 'match' for pattern matching
+        match h with
+        | ⟨y, hpx, hr⟩ =>
+        -- alternatively, 'let' works too
+        --let ⟨y, hpx, hr⟩ : (∃ x : α, p x ∧ r) := h
+        have left : (∃ x : α, p x) := ⟨y, hpx⟩
+        have right : r := hr
+        show (∃ x : α, p x) ∧ r from ⟨left, right⟩
+    )
+
+    (
+      λ h : (∃ x : α, p x) ∧ r ↦
+        let ⟨y, hpx⟩ : (∃ x : α, p x) := h.left
+        let hr : r := h.right
+        show (∃ x : α, p x ∧ r) from ⟨y, hpx, hr⟩
+    )
 
 theorem e_property_4 {α : Type} {p q : α → Prop} :
 (∃ x : α, p x ∨ q x) ↔ (∃ x : α, p x) ∨ (∃ x : α, q x) := sorry
