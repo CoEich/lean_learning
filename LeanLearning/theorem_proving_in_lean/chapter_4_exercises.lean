@@ -153,7 +153,27 @@ theorem e_property_3 {α : Type} {p : α → Prop} {r : Prop} :
     )
 
 theorem e_property_4 {α : Type} {p q : α → Prop} :
-(∃ x : α, p x ∨ q x) ↔ (∃ x : α, p x) ∨ (∃ x : α, q x) := sorry
+(∃ x : α, p x ∨ q x) ↔ (∃ x : α, p x) ∨ (∃ x : α, q x) :=
+  Iff.intro
+
+    (
+      λ h : (∃ x : α, p x ∨ q x) ↦
+        let ⟨y, hpq⟩ := h
+        have impl1: p y → (∃ x : α, p x) ∨ (∃ x : α, q x) := λ hpy : p y ↦ Or.inl ⟨y, hpy⟩
+        have impl2: q y → (∃ x : α, p x) ∨ (∃ x : α, q x) := λ hqy : q y ↦ Or.inr ⟨y, hqy⟩
+        show (∃ x : α, p x) ∨ (∃ x : α, q x) from Or.elim hpq impl1 impl2
+    )
+
+    (
+      λ h : (∃ x : α, p x) ∨ (∃ x : α, q x) ↦
+        have impl1: (∃ x : α, p x) → (∃ x : α, p x ∨ q x) := λ hp : (∃ x : α, p x) ↦
+          let ⟨y, hpx⟩ := hp
+          show (∃ x : α, p x ∨ q x) from ⟨y, Or.inl hpx⟩
+        have impl2: (∃ x : α, q x) → (∃ x : α, p x ∨ q x) := λ hq : (∃ x : α, q x) ↦
+          let ⟨y, hqx⟩ := hq
+          show (∃ x : α, p x ∨ q x) from ⟨y, Or.inr hqx⟩
+        show (∃ x : α, p x ∨ q x) from Or.elim h impl1 impl2
+    )
 
 theorem e_property_5 {α : Type} {p : α → Prop}:
 (∀ x : α, p x) ↔ ¬ (∃ x : α, ¬ p x) := sorry
