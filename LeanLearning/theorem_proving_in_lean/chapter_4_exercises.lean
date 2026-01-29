@@ -176,7 +176,28 @@ theorem e_property_4 {α : Type} {p q : α → Prop} :
     )
 
 theorem e_property_5 {α : Type} {p : α → Prop}:
-(∀ x : α, p x) ↔ ¬ (∃ x : α, ¬ p x) := sorry
+(∀ x : α, p x) ↔ ¬ (∃ x : α, ¬ p x) :=
+  Iff.intro
+
+    (
+      λ (h : (∀ x : α, p x)) (hn : (∃ x : α, ¬ p x)) ↦
+        let ⟨y, hnp⟩ := hn
+        show False from hnp (h y)
+    )
+
+    (
+      λ (h : ¬ (∃ x : α, ¬ p x)) (x : α) ↦
+        /-we try out some anonymous notation here instead of
+          naming every proof term and then use ‹ › to automatically
+          infer the term later on
+        -/
+        have : p x ∨ ¬ (p x) := em (p x)
+        have : p x → p x := id
+        have : ¬ (p x) → p x := λ hn : ¬ (p x) ↦
+          have : (∃ x : α, ¬ p x) := ⟨x, hn⟩
+          show p x from absurd this h
+        show p x from Or.elim ‹p x ∨ ¬ (p x)›  ‹p x → p x› ‹¬ p x → p x›
+    )
 
 theorem e_property_6 {α : Type} {p: α → Prop}:
 (∃ x : α, p x) ↔ ¬ (∀ x : α, ¬ p x) := sorry
