@@ -1,3 +1,4 @@
+import LeanLearning.theorem_proving_in_lean.chapter_3_exercises
 set_option linter.unusedVariables false
 open Classical
 
@@ -199,8 +200,42 @@ theorem e_property_5 {α : Type} {p : α → Prop}:
         show p x from Or.elim ‹p x ∨ ¬ (p x)›  ‹p x → p x› ‹¬ p x → p x›
     )
 
+
+
 theorem e_property_6 {α : Type} {p: α → Prop}:
-(∃ x : α, p x) ↔ ¬ (∀ x : α, ¬ p x) := sorry
+(∃ x : α, p x) ↔ ¬ (∀ x : α, ¬ p x) :=
+  Iff.intro
+    /-
+    TODO: even though the proof is easy using the previous property,
+    it's still cumbersome to spell out all the details. Maybe revisit with tactics?
+    -/
+    (
+      -- auxiliary statement using previous property
+      have impl: ¬ (¬ (∀ x : α, ¬ p x)) → ¬ (∃ x : α, p x) := λ h : ¬ (¬ (∀ x : α, ¬ p x)) ↦
+        have : (∀ x : α, ¬ p x) := pf_by_contr.mp h
+        have f : ¬ (∃ x : α, ¬ (¬ (p x))) := e_property_5.mp this
+        show ¬ (∃ x : α, p x) from λ h : (∃ x : α, p x) ↦
+          let ⟨y, hpy⟩ := h
+          show False from f (⟨y, pf_by_contr.mpr hpy⟩)
+
+      λ h : (∃ x : α, p x) ↦
+        have nimpl := property_18 impl
+        show ¬ (∀ x : α, ¬ p x) from pf_by_contr.mp (nimpl (pf_by_contr.mpr h))
+    )
+
+    (
+      -- auxiliary statement using previous property
+      have impl: ¬ (∃ x : α, p x) → (∀ x : α, ¬ p x) := λ h : ¬ (∃ x : α, p x) ↦
+        have : ¬ (∃ x : α, ¬ (¬ p x)) := λ (h_ : (∃ x : α, ¬ (¬ p x))) ↦
+          let ⟨y, hpy⟩ := h_
+          have : (∃ x : α, p x) := ⟨y, pf_by_contr.mp hpy⟩
+          show False from h this
+        show (∀ x : α, ¬ p x) from e_property_5.mpr ‹¬ (∃ x : α, ¬ (¬ p x))›
+
+      λ h : ¬ (∀ x : α, ¬ p x) ↦
+        have nimpl := property_18 impl
+        show (∃ x : α, p x) from pf_by_contr.mp (nimpl h)
+    )
 
 theorem e_property_7 {α : Type} {p : α → Prop} :
 (¬ ∃ x : α, p x) ↔ (∀ x : α, ¬ p x) := sorry
