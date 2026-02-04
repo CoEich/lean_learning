@@ -201,7 +201,6 @@ theorem e_property_5 {α : Type} {p : α → Prop}:
     )
 
 
-
 theorem e_property_6 {α : Type} {p: α → Prop}:
 (∃ x : α, p x) ↔ ¬ (∀ x : α, ¬ p x) :=
   Iff.intro
@@ -238,7 +237,20 @@ theorem e_property_6 {α : Type} {p: α → Prop}:
     )
 
 theorem e_property_7 {α : Type} {p : α → Prop} :
-(¬ ∃ x : α, p x) ↔ (∀ x : α, ¬ p x) := sorry
+(¬ ∃ x : α, p x) ↔ (∀ x : α, ¬ p x) :=
+  Iff.intro
+
+    (
+      λ h : (¬ ∃ x : α, p x) ↦
+        have : (¬ ∃ x : α, p x) → ¬ ¬ (∀ x : α, ¬ p x) := property_18 (e_property_6.mpr)
+        show (∀ x : α, ¬ p x) from pf_by_contr.mp (this h)
+    )
+
+    (
+      λ h : (∀ x : α, ¬ p x) ↦
+        have : ¬ ¬ (∀ x : α, ¬ p x) → (¬ ∃ x : α, p x) := property_18 (e_property_6.mp)
+        show (¬ ∃ x : α, p x) from this (pf_by_contr.mpr h)
+    )
 
 theorem e_property_8 {α : Type} {p : α → Prop} :
 (¬ ∀ x : α, p x) ↔ (∃ x : α, ¬ p x) := sorry
