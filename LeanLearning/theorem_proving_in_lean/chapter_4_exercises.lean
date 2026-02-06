@@ -253,7 +253,20 @@ theorem e_property_7 {α : Type} {p : α → Prop} :
     )
 
 theorem e_property_8 {α : Type} {p : α → Prop} :
-(¬ ∀ x : α, p x) ↔ (∃ x : α, ¬ p x) := sorry
+(¬ ∀ x : α, p x) ↔ (∃ x : α, ¬ p x) :=
+  Iff.intro
+
+    (
+      λ h : (¬ ∀ x : α, p x) ↦
+        have : (¬ ∀ x : α, p x) → ¬ ¬ (∃ x : α, ¬ p x) := property_18 (e_property_5.mpr)
+        show (∃ x : α, ¬ p x) from pf_by_contr.mp (this h)
+    )
+
+    (
+      λ h : (∃ x : α, ¬ p x) ↦
+        have : (∃ x : α, ¬ p x) → (¬ ∀ x : α, ¬ (¬ p x)) := e_property_6.mp
+        show (¬ ∀ x : α, p x) from λ ha : (∀ x : α, p x) ↦ (this h) (λ (x : α) ↦ pf_by_contr.mpr (ha x))
+    )
 
 theorem e_property_9 {α : Type} {p : α → Prop} {r : Prop} :
 (∀ x : α, p x → r) ↔ (∃ x : α, p x) → r := sorry
