@@ -269,7 +269,20 @@ theorem e_property_8 {α : Type} {p : α → Prop} :
     )
 
 theorem e_property_9 {α : Type} {p : α → Prop} {r : Prop} :
-(∀ x : α, p x → r) ↔ (∃ x : α, p x) → r := sorry
+(∀ x : α, p x → r) ↔ (∃ x : α, p x) → r :=
+  Iff.intro
+
+    (
+      λ (ha : (∀ x : α, p x → r)) (he : (∃ x : α, p x)) ↦
+        let ⟨y, hpy⟩ := he
+        show r from (ha y) hpy
+    )
+
+    (
+      λ (h : (∃ x : α, p x) → r) (x : α) (hpx : p x) ↦
+        have : (∃ x : α, p x) := ⟨x, hpx⟩
+        show r from h this
+    )
 
 theorem e_property_10 {α : Type} {p : α → Prop} {r : Prop} (a : α) :
 (∃ x : α, p x → r) ↔ (∀ x : α, p x) → r := sorry
