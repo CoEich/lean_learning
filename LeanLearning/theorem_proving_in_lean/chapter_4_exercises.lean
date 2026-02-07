@@ -285,7 +285,32 @@ theorem e_property_9 {α : Type} {p : α → Prop} {r : Prop} :
     )
 
 theorem e_property_10 {α : Type} {p : α → Prop} {r : Prop} (a : α) :
-(∃ x : α, p x → r) ↔ (∀ x : α, p x) → r := sorry
+(∃ x : α, p x → r) ↔ (∀ x : α, p x) → r :=
+  Iff.intro
+
+    (
+      λ (he : (∃ x : α, p x → r)) (ha : (∀ x : α, p x)) ↦
+        let ⟨y, impl_y⟩ := he
+        show r from impl_y (ha y)
+    )
+
+    (
+      λ h : (∀ x : α, p x) → r ↦
+        have emr : r ∨ ¬ r := em r
+        have impl1 : r → (∃ x : α, p x → r) := λ hr : r ↦ ⟨a, λ hpx ↦ hr⟩
+        have impl2 : ¬ r → (∃ x : α, p x → r) := λ hnr : ¬ r ↦
+          have emne : (∃ x : α, ¬ p x) ∨ ¬ (∃ x : α, ¬ p x) := em (∃ x : α, ¬ p x)
+          have impl11 : (∃ x : α, ¬ p x) → (∃ x : α, p x → r) := λ henp : (∃ x : α, ¬ p x) ↦
+            let ⟨y, hnpy⟩ := henp
+            show (∃ x : α, p x → r) from ⟨y, λ hpy : p y ↦ False.elim (hnpy hpy)⟩
+          have impl12 : ¬ (∃ x : α, ¬ p x) → (∃ x : α, p x → r) := λ hnenp : ¬ (∃ x : α, ¬ p x) ↦
+            have : ∀ x : α, p x := e_property_5.mpr hnenp
+            show (∃ x : α, p x → r) from absurd (h this) hnr
+          show (∃ x : α, p x → r) from Or.elim emne impl11 impl12
+
+        show (∃ x : α, p x → r) from Or.elim emr impl1 impl2
+
+    )
 
 theorem e_property_11 {α : Type} {p : α → Prop} {r : Prop} (a : α) :
 (∃ x : α, r → p x) ↔ (r → ∃ x : α, p x) := sorry
