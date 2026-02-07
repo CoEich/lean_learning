@@ -313,4 +313,23 @@ theorem e_property_10 {α : Type} {p : α → Prop} {r : Prop} (a : α) :
     )
 
 theorem e_property_11 {α : Type} {p : α → Prop} {r : Prop} (a : α) :
-(∃ x : α, r → p x) ↔ (r → ∃ x : α, p x) := sorry
+(∃ x : α, r → p x) ↔ (r → ∃ x : α, p x) :=
+  Iff.intro
+
+    (
+      λ (h : (∃ x : α, r → p x)) (hr : r) ↦
+        let ⟨y, impl_y⟩ := h
+        show (∃ x : α, p x) from ⟨y, impl_y hr⟩
+    )
+
+    (
+      λ h : (r → ∃ x : α, p x) ↦
+        have emr : r ∨ ¬ r := em r
+        have impl1: r → (∃ x : α, r → p x) := λ hr : r ↦
+          have : ∃ x : α, p x := h hr
+          let ⟨y, hpy⟩ := this
+          show (∃ x : α, r → p x) from ⟨y, λ hrr ↦ hpy⟩
+        have impl2: ¬ r → (∃ x : α, r → p x) := λ hnr : ¬ r ↦
+          show (∃ x : α, r → p x) from ⟨a, λ hrr ↦ False.elim (hnr hrr)⟩
+        show (∃ x : α, r → p x) from Or.elim emr impl1 impl2
+    )
