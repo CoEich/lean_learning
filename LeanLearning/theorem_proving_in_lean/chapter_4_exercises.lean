@@ -100,21 +100,25 @@ example (h : ∀ x : men, shaves barber x ↔ ¬ shaves x x) : False :=
 Properly formulate all of the below propositions
 -/
 
-def even (n : Nat) : Prop := sorry
+def even (n : Nat) : Prop := ∃ m : Nat, n = 2*m
 
-def prime (n : Nat) : Prop := sorry
+def odd (n : Nat) : Prop := ¬ even n
 
-def infinitely_many_primes : Prop := sorry
+def divides (n : Nat) (m : Nat) := ∃ k : Nat, n = k*m
 
-def Fermat_prime (n : Nat) : Prop := sorry
+def prime (n : Nat) : Prop := ∀ m : Nat, divides n m → (m = 1) ∨ (m = n)
 
-def infinitely_many_Fermat_primes : Prop := sorry
+def infinitely_many_primes : Prop := ∀ n : Nat, prime n → ∃ m : Nat, (m > n) ∧ (prime m)
 
-def goldbach_conjecture : Prop := sorry
+def Fermat_prime (n : Nat) : Prop := ∃ m : Nat, n = 2^(2^m) + 1
 
-def Goldbach's_weak_conjecture : Prop := sorry
+def infinitely_many_Fermat_primes : Prop := ∀ n : Nat, Fermat_prime n → ∃ m : Nat, (m > n) ∧ (Fermat_prime m)
 
-def Fermat's_last_theorem : Prop := sorry
+def goldbach_conjecture : Prop := ∀ n : Nat, even n → ∃ m : Nat, ∃ k : Nat, (prime m) ∧ (prime k) ∧ (n = m + k)
+
+def Goldbach's_weak_conjecture : Prop := ∀ n : Nat, (n > 5) ∧ (odd n) → ∃ a : Nat, ∃ b : Nat, ∃ c : Nat, (prime a) ∧ (prime b) ∧ (prime c) ∧ (n = a + b + c)
+
+def Fermat's_last_theorem : Prop := ∀ n : Nat, n > 2 → ¬ (∃ a : Nat, ∃ b : Nat, ∃ c : Nat, a^n + b^n = c^n)
 
 /- Exercise 5 -/
 
