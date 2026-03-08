@@ -114,11 +114,11 @@ def Fermat_prime (n : Nat) : Prop := ∃ m : Nat, n = 2^(2^m) + 1
 
 def infinitely_many_Fermat_primes : Prop := ∀ n : Nat, Fermat_prime n → ∃ m : Nat, (m > n) ∧ (Fermat_prime m)
 
-def goldbach_conjecture : Prop := ∀ n : Nat, even n → ∃ m : Nat, ∃ k : Nat, (prime m) ∧ (prime k) ∧ (n = m + k)
+def goldbach_conjecture : Prop := ∀ n : Nat, even n → ∃ m k : Nat, (prime m) ∧ (prime k) ∧ (n = m + k)
 
-def Goldbach's_weak_conjecture : Prop := ∀ n : Nat, (n > 5) ∧ (odd n) → ∃ a : Nat, ∃ b : Nat, ∃ c : Nat, (prime a) ∧ (prime b) ∧ (prime c) ∧ (n = a + b + c)
+def Goldbach's_weak_conjecture : Prop := ∀ n : Nat, (n > 5) ∧ (odd n) → ∃ a b c : Nat, (prime a) ∧ (prime b) ∧ (prime c) ∧ (n = a + b + c)
 
-def Fermat's_last_theorem : Prop := ∀ n : Nat, n > 2 → ¬ (∃ a : Nat, ∃ b : Nat, ∃ c : Nat, a^n + b^n = c^n)
+def Fermat's_last_theorem : Prop := ∀ n : Nat, n > 2 → ¬ (∃ a b c : Nat, a^n + b^n = c^n)
 
 /- Exercise 5 -/
 
