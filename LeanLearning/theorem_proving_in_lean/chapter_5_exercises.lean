@@ -21,8 +21,40 @@ example (p: Prop) : ¬ (p ↔ ¬ p) := by
     . apply h.mpr
       . exact this
   . apply absurd
+    -- using assumption here looks for suitable assumptions in the context, similar to anonymous notation ‹p›
     . assumption
     . assumption
-    -- using assumption here looks for suitable assumptions in the context, similar (but shorter) to
-    -- . exact ‹p›
-    -- . exact ‹¬ p›
+
+    -- if we use a tactic multiple times, one can also use the "repeat" tactic
+    -- repeat assumption
+
+-- try intro tactic together with a match expression
+example (p q: Prop) : (¬p ∨ q) → (p → q) := by
+  intro
+  | Or.inl hnp =>
+    intro hp
+    apply absurd
+    repeat assumption
+  | Or.inr hq =>
+    intro
+    assumption
+
+-- similar when using "cases" tactic
+example (p q: Prop) : (¬p ∨ q) → (p → q) := by
+  intro h
+  cases h with
+  | inl =>
+    intro
+    apply absurd
+    repeat assumption
+  | inr =>
+    intro
+    assumption
+
+-- we try to push it here with anonymous notation, this leads to having to use the @ operator
+example (p q: Prop) : (¬p ∨ q) → (p → q) := by
+  intros
+  . cases ‹¬p ∨ q›
+    . apply @absurd p _
+      repeat assumption
+    . assumption
